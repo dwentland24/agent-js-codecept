@@ -4,6 +4,7 @@ const path = require('path');
 const debug = require('debug')('codeceptjs:reportportal');
 const { isMainThread } = require('worker_threads');
 const worker = require('worker_threads');
+const glob = require('glob')
 
 const {
   event, recorder, output, container,
@@ -54,10 +55,8 @@ const requiredFields = ['projectName', 'token', 'endpoint'];
 module.exports = (config) => {
   config = Object.assign(defaultConfig, config);
 
+
   
-  const rpLaunchId = fs.existsSync(LAUCH_ID_FILE_NAME)
-    ? fs.readFileSync(LAUCH_ID_FILE_NAME).toString()
-    : undefined;
 
   for (const field of requiredFields) {
     if (!config[field]) throw new Error(`ReportPortal config is invalid. Key ${field} is missing in config.\nRequired fields: ${requiredFields} `);
@@ -70,6 +69,7 @@ module.exports = (config) => {
   let stepObj;
   let failedStep;
   let rpClient;
+  let rpLaunchId
 
   let suiteStatus = rp_PASSED;
   let launchStatus = rp_PASSED;
@@ -82,6 +82,14 @@ module.exports = (config) => {
   }
 
   event.dispatcher.on(event.workers.before, async () => {
+
+    glob(`**/${LAUCH_ID_FILE_NAME}*`, function (er, files) {
+      for (const file of files) {
+          fs.unlinkSync(file);
+      }
+    })
+    
+
     launchObj = startLaunch();
 
     try {
@@ -105,6 +113,10 @@ module.exports = (config) => {
   });
 
   event.dispatcher.on(event.all.before, async () => {
+    rpLaunchId = fs.existsSync(LAUCH_ID_FILE_NAME)
+    ? fs.readFileSync(LAUCH_ID_FILE_NAME).toString()
+    : undefined;
+
     launchObj = startLaunch();
     try {
       await launchObj.promise;
@@ -146,6 +158,7 @@ module.exports = (config) => {
 
   event.dispatcher.on(event.test.before, (test) => {
     recorder.add(async () => {
+      output.print(`################# ${JSON.stringify(suiteObj, null, 2)}`);
       currentMetaSteps = [];
       stepObj = null;
       testObj = startTestItem(test.title, rp_TEST, suiteObj.tempId);
@@ -246,17 +259,40 @@ module.exports = (config) => {
     });
   });
 
-  function startTestItem(testTitle, method, parentId = null) {
+  async function startTestItem(testTitle, method, parentId = undefined) {
     try {
+      // File exists > read file
+      // File doesnt > create file, gwrite parentId there, 
+      // create launch with parentId
+      if (method == rp_SUITE) {
+        const parentId = fs.existsSync(`${LAUCH_ID_FILE_NAME}_${testTitle}`)
+          ? fs.readFileSync(`${LAUCH_ID_FILE_NAME}_${testTitle}`).toString()
+          : parentId;
+
+        if (parentId) {
+          suiteObj = { tempId: parentId, promise: {} }
+          
+          return suiteObj
+        }
+      }
+      
       const hasStats = method !== rp_STEP;
-      return rpClient.startTestItem({
+      const result = rpClient.startTestItem({
         name: testTitle,
         type: method,
         hasStats,
       }, launchObj.tempId, parentId);
-    } catch (error) {
-      output.err(error); 
+
+      output.print(`suiteObj #################################: ${ JSON.stringify(suiteObj, null, 2)  }`);
+      output.print(`started TestItem #################################: testTitle :${ testTitle  }, launchObj.tempId: ${ launchObj.tempId  }, parentId: ${ parentId }`);
+      // output.print(`started TestItem #################################: result :${ JSON.stringify(await result.promise, null, 2)  }, launchObj.tempId: ${ launchObj.tempId  }, parentId: ${ parentId }`);
+
+      if (!parentId && method == rp_SUITE) fs.writeFileSync(`${LAUCH_ID_FILE_NAME}_${testTitle}`, result.tempId)
+      return result
     }
+    catch (error) {
+      output.error(error);
+    }      
   }
 
   event.dispatcher.on(event.all.result, async () => {
