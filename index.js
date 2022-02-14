@@ -4,6 +4,7 @@ const path = require('path');
 const debug = require('debug')('codeceptjs:reportportal');
 const { isMainThread } = require('worker_threads');
 const worker = require('worker_threads');
+const t = require('directory-tree')
 
 const {
   event, recorder, output, container,
@@ -116,6 +117,7 @@ module.exports = (config) => {
   });
 
   event.dispatcher.on(event.all.before, async () => {
+    console.log(t(config.selenoidVideoPath))
     launchObj = startLaunch();
     let launchTest;
     try {
@@ -339,6 +341,7 @@ module.exports = (config) => {
   }
 
   async function attachVideo() {
+    output.log(t(config.selenoidVideoPath))
     const content = fs.readFileSync(path.join(config.selenoidVideoPath, videoName));
     fs.unlinkSync(path.join(config.selenoidVideoPath, videoName));
     return {
