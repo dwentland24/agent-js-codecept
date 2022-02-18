@@ -18,6 +18,7 @@ const rp_PASSED = 'PASSED';
 const rp_SUITE = 'SUITE';
 const rp_TEST = 'TEST';
 const rp_STEP = 'STEP';
+const rp_SKIPPED = 'SKIPPED';
 
 const RP_DEBUG_MODE = 'DEBUG';
 const RP_DEFAULT_MODE = 'DEFAULT'
@@ -167,6 +168,16 @@ module.exports = (config) => {
       debug(`${testObj.tempId}: The testId '${test.title}' is started.`);
     });
   });
+
+  event.dispatcher.on(event.test.skipped, (test) => {
+    testObj = startTestItem(test.title, rp_STEP, suiteObj.tempId, true);
+    
+    rpClient.finishTestItem(testObj.tempId, {
+      endTime: test.endTime || rpClient.helpers.now(),
+      status: rp_SKIPPED,
+    });
+    debug(`${testObj.tempId}: Test '${test.title}' Skipped.`);
+  })
 
   event.dispatcher.on(event.step.before, (step) => {
     recorder.add(async () => {
