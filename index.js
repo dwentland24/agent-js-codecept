@@ -178,8 +178,8 @@ module.exports = (config) => {
     });
     debug(`${testObj.tempId}: Test '${test.title}' Skipped.`);
   })
-
-  event.dispatcher.on(event.step.before, (step) => {
+  
+  event.dispatcher.on(event.step.started, (step) => {
     recorder.add(async () => {
       const parent = await startMetaSteps(step);
       stepObj = startTestItem(step.toString().slice(0, 300), rp_STEP, parent.tempId);
