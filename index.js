@@ -23,7 +23,7 @@ const RP_DEBUG_MODE = 'DEBUG';
 const RP_DEFAULT_MODE = 'DEFAULT'
 
 const LAUCH_ID_FILE_NAME = 'LAUNCH_ID';
-const LAUCH_URL_FILE_NAME = 'LAUNCH_URL'
+const LAUNCH_URL_FILE_NAME = 'LAUNCH_URL'
 
 const screenshotHelpers = [
   'WebDriver',
