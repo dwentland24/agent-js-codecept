@@ -98,9 +98,9 @@ module.exports = (config) => {
 
     try {
       const launch = await launchObj.promise;
-      fs.writeFileSync(LAUCH_ID_FILE_NAME, launch.id);
+      fs.writeFileSync(LAUNCH_ID_FILE_NAME, launch.id);
 
-      debug(`Writing lauch id ${launch.id} to file ${LAUCH_ID_FILE_NAME}`);
+      debug(`Writing lauch id ${launch.id} to file ${LAUNCH_ID_FILE_NAME}`);
       output.debug(`Starting ReportPortal aggregate launch: ${launch.id}`);
 
       isControlThread = true;
@@ -113,7 +113,7 @@ module.exports = (config) => {
 
   event.dispatcher.on(event.workers.after, async () => {
     await finishLaunch();
-    fs.unlinkSync(LAUCH_ID_FILE_NAME);
+    fs.unlinkSync(LAUNCH_ID_FILE_NAME);
   });
 
   event.dispatcher.on(event.all.before, async () => {
@@ -293,7 +293,7 @@ module.exports = (config) => {
       }).promise;
     }
 
-    if (!isControlThread && !fs.existsSync(LAUCH_ID_FILE_NAME)) await finishLaunch()
+    if (!isControlThread && !fs.existsSync(LAUNCH_ID_FILE_NAME)) await finishLaunch()
   });
 
   function startLaunch(suiteTitle) {
