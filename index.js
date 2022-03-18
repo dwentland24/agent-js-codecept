@@ -363,7 +363,7 @@ module.exports = (config) => {
 
       fs.writeFile(LAUNCH_URL_FILE_NAME, response.link, function (err) {
         if (err) return console.log(err);
-        console.log("Output Lauch Url to a file " + LAUCH_URL_FILE_NAME);
+        output.print(`Output Launch Url to file: ${LAUNCH_URL_FILE_NAME}`);
       });
 
       event.emit('reportportal.result', response);
