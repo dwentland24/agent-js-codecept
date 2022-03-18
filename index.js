@@ -22,7 +22,7 @@ const rp_STEP = 'STEP';
 const RP_DEBUG_MODE = 'DEBUG';
 const RP_DEFAULT_MODE = 'DEFAULT'
 
-const LAUCH_ID_FILE_NAME = 'LAUNCH_ID';
+const LAUNCH_ID_FILE_NAME = 'LAUNCH_ID';
 const LAUNCH_URL_FILE_NAME = 'LAUNCH_URL'
 
 const screenshotHelpers = [
