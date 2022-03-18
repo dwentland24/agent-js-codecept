@@ -67,8 +67,8 @@ module.exports = (config) => {
   }
 
   
-  const rpLaunchId = fs.existsSync(LAUCH_ID_FILE_NAME)
-    ? fs.readFileSync(LAUCH_ID_FILE_NAME).toString()
+  const rpLaunchId = fs.existsSync(LAUNCH_ID_FILE_NAME)
+    ? fs.readFileSync(LAUNCH_ID_FILE_NAME).toString()
     : undefined;
 
   for (const field of requiredFields) {
