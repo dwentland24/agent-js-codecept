@@ -361,7 +361,7 @@ module.exports = (config) => {
       reportUrl = response.link;
       output.print(` 📋 Report #${response.number} saved ➡`, response.link);
 
-      fs.writeFile(LAUCH_URL_FILE_NAME, response.link, function (err) {
+      fs.writeFile(LAUNCH_URL_FILE_NAME, response.link, function (err) {
         if (err) return console.log(err);
         console.log("Output Lauch Url to a file " + LAUCH_URL_FILE_NAME);
       });
