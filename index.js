@@ -23,7 +23,8 @@ const rp_SKIPPED = 'SKIPPED';
 const RP_DEBUG_MODE = 'DEBUG';
 const RP_DEFAULT_MODE = 'DEFAULT'
 
-const LAUCH_ID_FILE_NAME = 'LAUNCH_ID';
+const LAUNCH_ID_FILE_NAME = 'LAUNCH_ID';
+const LAUNCH_URL_FILE_NAME = 'LAUNCH_URL'
 
 const screenshotHelpers = [
   'WebDriver',
@@ -67,8 +68,8 @@ module.exports = (config) => {
   }
 
   
-  const rpLaunchId = fs.existsSync(LAUCH_ID_FILE_NAME)
-    ? fs.readFileSync(LAUCH_ID_FILE_NAME).toString()
+  const rpLaunchId = fs.existsSync(LAUNCH_ID_FILE_NAME)
+    ? fs.readFileSync(LAUNCH_ID_FILE_NAME).toString()
     : undefined;
 
   for (const field of requiredFields) {
@@ -98,9 +99,9 @@ module.exports = (config) => {
 
     try {
       const launch = await launchObj.promise;
-      fs.writeFileSync(LAUCH_ID_FILE_NAME, launch.id);
+      fs.writeFileSync(LAUNCH_ID_FILE_NAME, launch.id);
 
-      debug(`Writing lauch id ${launch.id} to file ${LAUCH_ID_FILE_NAME}`);
+      debug(`Writing lauch id ${launch.id} to file ${LAUNCH_ID_FILE_NAME}`);
       output.debug(`Starting ReportPortal aggregate launch: ${launch.id}`);
 
       isControlThread = true;
@@ -113,7 +114,7 @@ module.exports = (config) => {
 
   event.dispatcher.on(event.workers.after, async () => {
     await finishLaunch();
-    fs.unlinkSync(LAUCH_ID_FILE_NAME);
+    fs.unlinkSync(LAUNCH_ID_FILE_NAME);
   });
 
   event.dispatcher.on(event.all.before, async () => {
@@ -303,7 +304,7 @@ module.exports = (config) => {
       }).promise;
     }
 
-    if (!isControlThread && !fs.existsSync(LAUCH_ID_FILE_NAME)) await finishLaunch()
+    if (!isControlThread && !fs.existsSync(LAUNCH_ID_FILE_NAME)) await finishLaunch()
   });
 
   function startLaunch(suiteTitle) {
@@ -370,6 +371,12 @@ module.exports = (config) => {
 
       reportUrl = response.link;
       output.print(` 📋 Report #${response.number} saved ➡`, response.link);
+
+      fs.writeFile(LAUNCH_URL_FILE_NAME, response.link, function (err) {
+        if (err) return console.log(err);
+        output.print(`Output Launch Url to file: ${LAUNCH_URL_FILE_NAME}`);
+      });
+
       event.emit('reportportal.result', response);
     } catch (error) {
       console.log(error);
