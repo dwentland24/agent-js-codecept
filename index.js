@@ -4,6 +4,7 @@ const path = require('path');
 const debug = require('debug')('codeceptjs:reportportal');
 const { isMainThread } = require('worker_threads');
 const worker = require('worker_threads');
+const deepClone = require('lodash.clonedeep')
 
 const {
   event, recorder, output, container,
@@ -413,7 +414,7 @@ module.exports = (config) => {
       debug(`${metaStep.tempId}: The stepId '${metaStep.toString()}' is started. Nested: ${isNested}`);
     }
 
-    currentMetaSteps = metaSteps;
+    currentMetaSteps = deepClone(metaSteps);
     return currentMetaSteps[currentMetaSteps.length - 1] || testObj;
   }
 
