@@ -55,7 +55,8 @@ const defaultConfig = {
   enabled: false,
   selenoidVideoPath: './output/video',
   selenoidVideoUpload: false,
-  debugMode: false
+  debugMode: false,
+  fullPageScreenshots: false,
 };
 
 const requiredFields = ['projectName', 'token', 'endpoint'];
@@ -211,12 +212,12 @@ module.exports = (config) => {
     launchStatus = rp_FAILED;
     suiteStatus = rp_FAILED;
 
+    const screenshot = await attachScreenshot();
+
     if (failedStep && failedStep.tempId) {
       const step = failedStep;
 
       debug('Attaching screenshot & error to failed step');
-
-      const screenshot = await attachScreenshot();
 
       await rpClient.sendLog(step.tempId, {
         level: 'ERROR',
@@ -233,7 +234,7 @@ module.exports = (config) => {
       await rpClient.sendLog(test.tempId, {
         level: 'ERROR',
         message: `${err.stack}`,
-      }).promise;
+      }, screenshot).promise;
     }
 
     // Upload selenoid video if configured
@@ -335,7 +336,7 @@ module.exports = (config) => {
 
     const fileName = `${rpClient.helpers.now()}.png`;
     try {
-      await helper.saveScreenshot(fileName);
+      await helper.saveScreenshot(fileName, config.fullPageScreenshots || false);
     } catch (err) {
       output.error('Couldn\'t save screenshot');
       return undefined;
