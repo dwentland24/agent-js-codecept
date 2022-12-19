@@ -55,7 +55,8 @@ const defaultConfig = {
   enabled: false,
   selenoidVideoPath: './output/video',
   selenoidVideoUpload: false,
-  debugMode: false
+  debugMode: false,
+  fullPageScreenshots: false,
 };
 
 const requiredFields = ['projectName', 'token', 'endpoint'];
@@ -335,7 +336,7 @@ module.exports = (config) => {
 
     const fileName = `${rpClient.helpers.now()}.png`;
     try {
-      await helper.saveScreenshot(fileName);
+      await helper.saveScreenshot(fileName, config.fullPageScreenshots || false);
     } catch (err) {
       output.error('Couldn\'t save screenshot');
       return undefined;
