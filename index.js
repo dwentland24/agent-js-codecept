@@ -211,12 +211,12 @@ module.exports = (config) => {
     launchStatus = rp_FAILED;
     suiteStatus = rp_FAILED;
 
+    const screenshot = await attachScreenshot();
+
     if (failedStep && failedStep.tempId) {
       const step = failedStep;
 
       debug('Attaching screenshot & error to failed step');
-
-      const screenshot = await attachScreenshot();
 
       await rpClient.sendLog(step.tempId, {
         level: 'ERROR',
@@ -233,7 +233,7 @@ module.exports = (config) => {
       await rpClient.sendLog(test.tempId, {
         level: 'ERROR',
         message: `${err.stack}`,
-      }).promise;
+      }, screenshot).promise;
     }
 
     // Upload selenoid video if configured
